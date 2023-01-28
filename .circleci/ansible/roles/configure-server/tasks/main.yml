@@ -1,20 +1,31 @@
 ---
-- name: "Add Node.js from source"
-  become: true
-  shell: |
-    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-- name: "install Node.js 13"
-  become: true
+- name: 'update and upgrade packages.' # sudo apt upgrade
+  become: yes
   apt:
-    name: ["nodejs"]
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400
+- name: remove unneeded dependencies # sudo apt autoremove
+  become: yes
+  apt:
+    autoremove: yes
+- name: install deps # sudo apt install nodejs npm
+  become: yes
+  apt:
+    name: ['nodejs', 'npm']
     state: latest
     update_cache: yes
-- name: "Ïnstall PM2 Globally"
+    
+- name: Ïnstall pm2 # sudo npm install pm2 -g
+  become: yes
   npm:
     name: pm2
     global: yes
-- name: "move env variables to /etc/profile.d/"
-  become: true
-  copy:
-    src: myenv.sh
-    dest: /etc/profile.d/
+    state: latest
+    production: yes
+
+# - name: "move env variables to /etc/profile.d/"
+#   become: true
+#   copy:
+#     src: myenv.sh
+#     dest: /etc/profile.d/
