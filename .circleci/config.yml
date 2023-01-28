@@ -199,7 +199,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: pyhon3.7-alpine3.16
+      - image: cimg/base:stable
     steps:
       - checkout
       - add_ssh_keys:
