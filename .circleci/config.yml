@@ -15,26 +15,26 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      workflows:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}   
+      workflow_id:
+        default: "${CIRCLE_WORKFLOW_ID:0:7}"
+        type: string   
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             aws cloudformation delete-stack \
-            --stack-name udapeople-backend-<<parameters.worKflow_id>>
-            aws s3 rm s3://udapeople-<<parameters.worKflow_id>> --recursive
+            --stack-name udapeople-backend-<<parameters.workflow_id>>
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack \
-            --stack-name "udapeople-frontend-<<parameters.worKflow_id>>
+            --stack-name "udapeople-frontend-<<parameters.workflow_id>>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      workflows:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}     
+      workflow_id:  
+        default: "${CIRCLE_WORKFLOW_ID:0:7}" 
+        type: string    
     steps:
       - run:
           name: Revert migrations
