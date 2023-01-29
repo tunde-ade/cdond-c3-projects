@@ -1,16 +1,23 @@
 version: 2.1
 
 commands:
+  install_awscli:
+    description: Install AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
   install_ansible:
     description: install ansible
     steps:
       - run:
           name: install Ansible
           command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
+            python3 -m pip install --user ansible
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -199,42 +206,26 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.10
     steps:
       - checkout
+      - install_awscli
+      - install_ansible
       - add_ssh_keys:
           fingerprints:
             - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
       - attach_workspace:
-          at: ~/
-
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update tar gzip ansible nodejs npm curl && \
-            pip install awscli
-      - run:
-          name: Install ansible
-          command: |
-            apk add --update ansible                           
+          at: ~/                           
       - run:
           name: Configure server
           command: |
-             echo ENVIRONMENT=production > backend/.env
-             echo TYPEORM_CONNECTION=postgres >> backend/.env
-             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
-             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
-             echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend/.env
-             echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-             echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env" 
-             cat backend/.env
              cd .circleci/ansible
+             cat inventory.txt
+
              ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
