@@ -278,7 +278,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_ansible
+      - install_nodejs
       - restore_cache:
           keys: [frontend-build]
       - add_ssh_keys:
