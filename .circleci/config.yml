@@ -66,6 +66,7 @@ commands:
             then
             cd ~/project/backend
             npm install
+            npm run build
             npm run migrations:revert
             fi
             
@@ -252,6 +253,7 @@ jobs:
             cd backend
             npm install
             npm audit fix --audit-level-critical --force
+            npm run build
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt
       - run:
@@ -298,7 +300,6 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm audit fix --audit-level-critical --force
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
