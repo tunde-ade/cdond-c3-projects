@@ -375,8 +375,8 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
 
-            export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
-            echo "${BACKEND_PUBLIC_IP}"
+            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            echo ${BACKEND_PUBLIC_IP}
             if curl -s $API_URL/api/status | grep "ok"
             then
               exit 0
@@ -386,7 +386,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com"
+            URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s ${URL} | grep "Welcome"
             then
               # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
@@ -395,8 +395,10 @@ jobs:
               exit 2
             fi
       # Here's where you will add some code to rollback on failure  
-      - destroy-environment
-      - revert-migrations
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
 #   cloudfront-update:
 #     docker:
