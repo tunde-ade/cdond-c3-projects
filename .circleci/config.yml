@@ -251,6 +251,7 @@ jobs:
           command: |
             cd backend
             npm install
+            npm audit fix --audit-level-critical --force
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt
       - run:
@@ -265,7 +266,8 @@ jobs:
      # Here's where you will add some code to rollback on failure
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations      
+      - revert-migrations
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"      
 
   deploy-frontend:
     docker:
@@ -275,22 +277,28 @@ jobs:
       - install_awscli
       - install_ansible
       - restore_cache:
-          keys: [frontend-deploy]
+          keys: [frontend-build]
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip ansible nodejs npm curl && \
+            pip install awscli
       - run:
           name: Get backend url
           command: |
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+            export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
 
-              echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
-              cat frontend/.env
+            echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             npm install
+            npm audit fix --audit-level-critical --force
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
@@ -308,7 +316,7 @@ jobs:
       - install_awscli
       - install_nodejs
       - restore_cache:
-          keys: [backend-deploy]
+          keys: [backend-build]
       - add_ssh_keys:
           fingerprints:
             - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
