@@ -1,28 +1,31 @@
 ---
+- name: "Install Node.js 13"
+  shell: |
+    # Install Node.js LTS version as our base Node.js version
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+
+    # Use n version manager to switch to Node.js v13.8.0
+    sudo npm install -g n
+    sudo n 13.8.0
+
+- name: "Install PM2 Globally"
+  npm:
+    name: pm2
+    global: yes
+
 - name: 'update and upgrade packages.' # sudo apt upgrade
   become: yes
   apt:
     upgrade: yes
     update_cache: yes
     cache_valid_time: 86400
+
 - name: remove unneeded dependencies # sudo apt autoremove
   become: yes
   apt:
     autoremove: yes
-- name: install deps # sudo apt install nodejs npm
-  become: yes
-  apt:
-    name: ['nodejs', 'npm']
-    state: latest
-    update_cache: yes
-    
-- name: Ïnstall pm2 # sudo npm install pm2 -g
-  become: yes
-  npm:
-    name: pm2
-    global: yes
-    state: latest
-    production: yes
+
 
 # - name: "move env variables to /etc/profile.d/"
 #   become: true
