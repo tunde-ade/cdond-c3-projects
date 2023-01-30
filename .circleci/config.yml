@@ -277,10 +277,6 @@ jobs:
       - restore_cache:
           keys: [frontend-deploy]
       - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache tar gzip nodejs npm
-      - run:
           name: Get backend url
           command: |
             BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
