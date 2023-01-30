@@ -281,11 +281,11 @@ jobs:
       - install_ansible
       - restore_cache:
           keys: [frontend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update tar gzip ansible nodejs npm curl && \
-            pip install awscli
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #     cd frontend
+      #     npm install
       - run:
           name: Get backend url
           command: |
@@ -306,8 +306,10 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
       # Here's where you will add some code to rollback on failure      
-      - destroy-environment
-      - revert-migrations
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
   deploy-backend:
     docker:
