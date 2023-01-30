@@ -61,13 +61,14 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl --insecure https://kvdb.io/${WxTiCa4RsVG3Grtsk1Y2RL}/migration_<<parameters.workflow_ID>>)
+            
             SUCCESS = 1
             if(( $SUCCESS==1 )); 
             then
             cd ~/project/backend
             npm install
-            npm run build
-            npm run migrations:revert
+            npm run migration:revert
             fi
             
 jobs:
@@ -247,13 +248,13 @@ jobs:
       - checkout
       - install_awscli
       - install_nodejs
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Run migrations
           command: |
             cd backend
             npm install
-            npm audit fix --audit-level-critical --force
-            npm run build
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt
       - run:
@@ -261,7 +262,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-            curl https://kvdb.io/WxTiCa4RsVG3Grtsk1Y2RL/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            curl https://kvdb.io/${WxTiCa4RsVG3Grtsk1Y2RL}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             else
               echo "No migrations are pushing"
             fi
