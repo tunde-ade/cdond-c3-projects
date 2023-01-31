@@ -21,8 +21,8 @@
     update_cache: yes
     cache_valid_time: 86400
 
-- name: "move env variables to /etc/profile.d/"
-  become: true
-  copy:
-    src: myenv.sh
-    dest: /etc/profile.d/
+# - name: "move env variables to /etc/profile.d/"
+#   become: true
+#   copy:
+#     src: myenv.sh
+#     dest: /etc/profile.d/
