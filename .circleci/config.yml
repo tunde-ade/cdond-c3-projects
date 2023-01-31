@@ -340,6 +340,7 @@ jobs:
           name: Package Backend
           command: |
             cd backend
+            nmp i
             npm run build
             tar -czf artifact.tar.gz dist/* package*
 
@@ -396,10 +397,9 @@ jobs:
               exit 2
             fi
       # Here's where you will add some code to rollback on failure  
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment
+      - revert-migrations
+
 
 #   cloudfront-update:
 #     docker:
