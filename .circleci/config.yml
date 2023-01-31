@@ -334,6 +334,8 @@ jobs:
           command: |
             cd backend
             npm install
+            yum -y install tar 
+            yum -y install gzip
       - run:
           name: Package Backend
           command: |
