@@ -21,14 +21,8 @@
     update_cache: yes
     cache_valid_time: 86400
 
-- name: remove unneeded dependencies # sudo apt autoremove
-  become: yes
-  apt:
-    autoremove: yes
-
-
-# - name: "move env variables to /etc/profile.d/"
-#   become: true
-#   copy:
-#     src: myenv.sh
-#     dest: /etc/profile.d/
+- name: "move env variables to /etc/profile.d/"
+  become: true
+  copy:
+    src: myenv.sh
+    dest: /etc/profile.d/
