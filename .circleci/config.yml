@@ -416,7 +416,7 @@ jobs:
               exit 2
             fi
       #Here's where you will add some code to rollback on failure  
-      - destroy-environment
+      # - destroy-environment
       - revert-migrations
 
 
