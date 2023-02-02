@@ -375,8 +375,8 @@ jobs:
       - checkout
       - install_awscli
       - install_nodejs
-      - attach_workspace:
-          at: ~/
+      # - attach_workspace:
+      #     at: ~/
       - run:
           name: Backend smoke test.
           command: |
@@ -388,7 +388,7 @@ jobs:
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
             echo ${BACKEND_PUBLIC_IP}
             echo ${API_URL}
-            if curl -s $API_URL/api/status | grep "ok"
+            if curl $API_URL/api/status | grep "ok"
             then
               exit 0
             else
@@ -400,7 +400,6 @@ jobs:
             URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s ${URL} | grep "Welcome"
             then
-              # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
               exit 1
             else
               exit 2
