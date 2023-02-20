@@ -62,7 +62,7 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure https://kvdb.io/Rew52F1DfGE3No2QjQDz7T/migration_<< parameters.workflow_id >>)
+            SUCCESS=$(curl --insecure https://kvdb.io/WxTiCa4RsVG3rtsk1Y2RL/migration_<< parameters.workflow_id >>)
             
             SUCCESS = 1
             if (( $SUCCESS==1 )); 
@@ -208,10 +208,12 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo $(aws ec2 describe-instances \
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter Name=tag:Name:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \ 
-            --output text) >> ~/project/.circleci/ansible/inventory.txt
+            --filter "Name=tag:Name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \ 
+            --output text)
+            echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
@@ -233,25 +235,14 @@ jobs:
       - attach_workspace:
           at: ~/                           
       - run:
-          name: Configure server
+          name: Run Configure server Ansible play
           command: |
-             echo ENVIRONMENT=production > backend/.env
-             echo TYPEORM_CONNECTION=postgres >> backend/.env
-             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
-             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
-             echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend/.env
-             echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-             echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env" 
-             cat backend/.env
              cd .circleci/ansible
              cat inventory.txt
 
              ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment
+          
 
   run-migrations:
     docker:
@@ -274,7 +265,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-              curl https://kvdb.io/Rew52F1DfGE3No2QjQDz7T/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              curl https://kvdb.io/WxTiCa4RsVG3rtsk1Y2RL/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             else
               echo "Migrations failure"
             fi
@@ -291,11 +282,11 @@ jobs:
       - install_nodejs
       - restore_cache:
           keys: [frontend-build]
-      - add_ssh_keys:
-          fingerprints:
-            - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
-      - attach_workspace:
-          at: ~/
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
+      # - attach_workspace:
+      #     at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -304,7 +295,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
@@ -317,14 +308,12 @@ jobs:
             cd frontend
             npm install
             npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            # tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
       # Here's where you will add some code to rollback on failure      
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment
+      - revert-migrations
 
   deploy-backend:
     docker:
@@ -346,35 +335,25 @@ jobs:
           command: |
             cd backend
             npm install
-            sudo apt -y install tar gzip curl
-      # - run:
-      #     name: Package Backend
-      #     command: |
-      #       cd backend
-      #       npm i
-      #       npm run build
-      #       tar -czf artifact.tar.gz dist/* package*
-
-      #       cd ..
-      #       cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
+            # sudo apt -y install tar gzip curl
       - run:
-          name: Deploy backend
+          name: Package Backend
           command: |
             cd backend
-            npm i
             npm run build
             tar -czf artifact.tar.gz dist/* package*
 
             cd ..
-            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
+      - run:
+          name: Deploy backend
+          command: |
             export TYPEORM_MIGRATIONS_DIR=./migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
-
+         
             cd .circleci/ansible
             cat inventory.txt
-            echo "contents of the inventory.txt file is ......"
             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
@@ -400,7 +379,7 @@ jobs:
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
             echo ${BACKEND_PUBLIC_IP}
             echo ${API_URL}
-            if curl $API_URL/api/status | grep "ok"
+            if curl -s $API_URL/api/status | grep "ok"
             then
               exit 0
             else
@@ -417,7 +396,7 @@ jobs:
               exit 2
             fi
       #Here's where you will add some code to rollback on failure  
-      # - destroy-environment
+      - destroy-environment
       - revert-migrations
 
 
