@@ -19,8 +19,7 @@ commands:
           command: |
             # Install Node.js LTS version as our base Node.js version
             curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-            sudo apt install -y nodejs
-
+            sudo apt-get install -y nodejs
             # Use n version manager to use Node.js v13.8.0
             sudo npm install --global n
             sudo n 13.8.0
@@ -354,7 +353,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
-      # - destroy-environment
+      - destroy-environment
       - revert-migrations
   
   smoke-test:
@@ -394,7 +393,7 @@ jobs:
               exit 2
             fi
       #Here's where you will add some code to rollback on failure  
-      - destroy-environment
+      # - destroy-environment
       - revert-migrations
 
 
