@@ -218,26 +218,25 @@ jobs:
       # Here's where you will add some code to rollback on failure 
       - destroy-environment    
 
-  # configure-infrastructure:
-  #   docker:
-  #     - image: cimg/python:3.10
-  #   steps:
-  #     - checkout
-  #     - install_awscli
-  #     - install_ansible
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
-  #     - attach_workspace:
-  #         at: ~/                           
-  #     - run:
-  #         name: Run Configure server Ansible play
-  #         command: |
-  #           cd .circleci/ansible
-  #           cat inventory.txt
+  configure-infrastructure:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"]
+      - attach_workspace:
+          at: ~/                           
+      - run:
+          name: Run Configure server Ansible play
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
 
-  #           ansible-playbook -i inventory.txt configure-server.yml
-  #     - destroy-environment
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
           
 
   # run-migrations:
@@ -449,8 +448,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
