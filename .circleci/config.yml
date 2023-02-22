@@ -61,7 +61,7 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure https://kvdb.io/WxTiCa4RsVG3rtsk1Y2RL/migration_<< parameters.workflow_id >>)
+            SUCCESS=$(curl --insecure https://kvdb.io/GEn2WMoitQETDzL1jxzn3d/migration_<< parameters.workflow_id >>)
             
             SUCCESS = 1
             if (( $SUCCESS==1 )); 
@@ -260,7 +260,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-              curl https://kvdb.io/WxTiCa4RsVG3rtsk1Y2RL/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              curl https://kvdb.io/GEn2WMoitQETDzL1jxzn3d/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             else
               echo "Migrations failure"
             fi
@@ -307,7 +307,7 @@ jobs:
   #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
   #     # Here's where you will add some code to rollback on failure      
-  #     # - destroy-environment
+  #     - destroy-environment
   #     - revert-migrations
 
   # deploy-backend:
@@ -321,8 +321,7 @@ jobs:
   #     - restore_cache:
   #         keys: [backend-build]
   #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"
+  #         fingerprints: ["34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"]
   #     - attach_workspace:
   #         at: ~/
   #     - run:
