@@ -140,44 +140,44 @@ jobs:
           paths: [backend/node_modules]
           key: backend-test
             
-  # scan-frontend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [frontend-scan]
-  #     - run:
-  #         name: Run Frontend Scan
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm install oauth-sign@^0.9.0
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit --audit-level=critical 
-  #     - save_cache:
-  #         paths: [frontend/node_modules]
-  #         key: frontend-scan
-  # scan-backend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [backend-scan]
-  #     - run:
-  #         name: Run Backend Scan
-  #         command: |
-  #           cd backend
-  #           npm install
-  #           npm install oauth-sign@^0.9.0
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit --audit-level=critical 
-  #     - save_cache:
-  #         paths: [backend/node_modules]
-  #         key: backend-scan
+  scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-scan]
+      - run:
+          name: Run Frontend Scan
+          command: |
+            cd frontend
+            npm install
+            npm install oauth-sign@^0.9.0
+            npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical 
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-scan
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-scan]
+      - run:
+          name: Run Backend Scan
+          command: |
+            cd backend
+            npm install
+            npm install oauth-sign@^0.9.0
+            npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical 
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-scan
   # deploy-infrastructure:
   #   docker:
   #     - image: amazon/aws-cli
@@ -441,10 +441,10 @@ workflows:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
