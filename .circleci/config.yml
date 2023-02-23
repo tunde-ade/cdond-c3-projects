@@ -327,18 +327,16 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd backend
-            npm install
-            # sudo apt -y install tar gzip curl
-      - run:
-          name: Package Backend
-          command: |
-            cd backend
-            npm run build
-            tar -czf artifact.tar.gz dist/* package*
+            apk add --update --no-cache ansible tar gzip nodejs npm curl aws-cli
+      # - run:
+      #     name: Package Backend
+      #     command: |
+      #       cd backend
+      #       npm run build
+      #       tar -czf artifact.tar.gz dist/* package*
 
-            cd ..
-            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
+      #       cd ..
+      #       cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
       - run:
           name: Deploy backend
           command: |
