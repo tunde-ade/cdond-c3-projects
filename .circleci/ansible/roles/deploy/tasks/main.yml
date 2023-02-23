@@ -14,17 +14,17 @@
   apt:
     autoremove: yes
     
-- name: "Install dependencies [nodejs and npm]."
+- name: "Install dependencies nodejs"
   become: true
   apt:
-    name: ["nodejs", "npm"]
+    name: nodejs
     state: latest
     update_cache: yes
   
-# - name: "Installing Node Dependencies"
-#   shell: |
-#     cd ~/backend-app
-#     npm i  
+- name: "Installing npm dependencies"
+  shell: |
+    cd ~/backend-app
+    npm install  
 
 - name: "Install pm2"
   become: true
