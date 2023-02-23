@@ -27,6 +27,7 @@
     npm install  
 
 - name: "Install pm2 globally"
+  become: true
   npm:
     name: pm2
     global: yes
