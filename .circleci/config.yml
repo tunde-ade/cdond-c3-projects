@@ -328,8 +328,8 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update && \
-            sudo apt-get install -y tar gzip npm && \
-            sudo apt-get --fix-broken install -y
+            sudo apt-get dist-upgrade -y && \
+            sudo apt-get install -y tar gzip
       # - run:
       #     name: Package Backend
       #     command: |
