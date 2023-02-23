@@ -14,12 +14,17 @@
   apt:
     autoremove: yes
     
-- name: "Install dependencies [nodejs and npm]."
+- name: "Install dependencies nodejs"
   become: true
   apt:
-    name: ["nodejs", "npm"]
+    name: nodejs
     state: latest
     update_cache: yes
+  
+- name: "Installing Node Dependencies"
+  shell: |
+    cd ~/backend-app
+    npm i  
 
 - name: "Install PM2 Globally"
   npm:
@@ -28,19 +33,19 @@
     
 - name: Create Backend App Directory
   file:
-    path: ~/backend_app_dir
+    path: ~/backend-app
     state: directory
     
 - name: "Copy artifact into EC2 instance"
   become: true
   copy:
     src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/backend_app_dir/artifact.tar.gz
+    dest: ~/backend-app/artifact.tar.gz
     
 - name: "Start app"
   become: true
   shell: |
-    cd /home/ubuntu/backend_app_dir
+    cd ~/backend-app/dist
     tar xzvf artifact.tar.gz
     npm install
     npm run build
