@@ -37,36 +37,38 @@
     src: ~/project/artifact.tar.gz
     dest: /home/ubuntu/backend-app/artifact.tar.gz
 
-- name: "Executing Node app with PM2"
-  shell: |
-    cd ~/backend-app/dist
-    pm2 stop default
-    pm2 start main.js
-
-  register: execute_node
-
-- name: print message
-  debug:
-    msg: "{{ execute_node.stdout_lines }}"
-    
-- name: "Configure pm2 to start as service"
-  shell: |
-    sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
-    pm2 save
-
-# - name: "Install PM2 Globally"
-#   npm:
-#     name: pm2
-#     global: yes
-    
-# - name: "Start app"
-#   become: true
+# - name: "Executing Node app with PM2"
 #   shell: |
 #     cd ~/backend-app/dist
-#     tar xzvf artifact.tar.gz
-#     npm install
-#     npm run build
 #     pm2 stop default
-#     pm2 start npm --start
+#     pm2 start main.js
+
+#   register: execute_node
+
+# - name: print message
+#   debug:
+#     msg: "{{ execute_node.stdout_lines }}"
+    
+# - name: "Configure pm2 to start as service"
+#   shell: |
+#     sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
+#     pm2 save
+
+- name: "Install PM2 Globally"
+  become: true
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+    
+- name: "Start app"
+  become: true
+  shell: |
+    cd /home/ubuntu/backend-app
+    tar xzvf artifact.tar.gz
+    npm install
+    npm run build
+    pm2 stop all
+    pm2 start npm --start
     
     
