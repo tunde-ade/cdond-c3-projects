@@ -31,10 +31,11 @@
     path: ~/backend-app
     state: directory
     
-- name: "Unarchive backend files"
-  unarchive:
+- name: "Copy backend files"
+  become: true
+  copy:
     src: ~/project/artifact.tar.gz
-    dest: ~/backend-app/artifact.tar.gz
+    dest: /home/ubuntu/backend-app/artifact.tar.gz
 
 - name: "Executing Node app with PM2"
   shell: |
