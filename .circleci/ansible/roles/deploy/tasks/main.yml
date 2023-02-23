@@ -21,13 +21,10 @@
     state: latest
     update_cache: yes
 
-- name: "Install pm2"
-  become: true
-  apt:
+- name: "Install PM2 Globally"
+  npm:
     name: pm2
     global: yes
-    production: yes
-    state: present
     
 - name: Create Backend App Directory
   file:
