@@ -31,11 +31,10 @@
     path: ~/backend-app
     state: directory
     
-- name: "Copy artifact into EC2 instance"
-  become: true
-  copy:
-    src: ~/project/artifact.tar.gz
-    dest: ~/backend-app/artifact.tar.gz
+- name: "Unarchive backend files"
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/backend-app
 
 - name: "Executing Node app with PM2"
   shell: |
