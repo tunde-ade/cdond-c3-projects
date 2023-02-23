@@ -14,19 +14,19 @@
   apt:
     autoremove: yes
     
-- name: "Install dependencies nodejs"
+- name: "Install dependencies [nodejs and npm]."
   become: true
   apt:
-    name: nodejs
+    name: ["nodejs", "npm"]
     state: latest
     update_cache: yes
   
-- name: "Installing Node Dependencies"
-  shell: |
-    cd ~/backend-app
-    npm i  
+# - name: "Installing Node Dependencies"
+#   shell: |
+#     cd ~/backend-app
+#     npm i  
 
-- name: "Install PM2 Globally"
+- name: "Install pm2"
   become: true
   npm:
     name: pm2
@@ -45,6 +45,16 @@
     src: ~/project/artifact.tar.gz
     dest: /home/ubuntu/backend-app/artifact.tar.gz
 
+- name: "Start app"
+  become: true
+  shell: |
+    cd /home/ubuntu/backend-app
+    tar xzvf artifact.tar.gz
+    npm install
+    npm run build
+    pm2 stop all
+    pm2 start npm --start
+    
 # - name: "Executing Node app with PM2"
 #   shell: |
 #     cd ~/backend-app/dist
@@ -62,14 +72,6 @@
 #     sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
 #     pm2 save
 
-- name: "Start app"
-  become: true
-  shell: |
-    cd /home/ubuntu/backend-app
-    tar xzvf artifact.tar.gz
-    npm install
-    npm run build
-    pm2 stop all
-    pm2 start npm --start
+
     
     
