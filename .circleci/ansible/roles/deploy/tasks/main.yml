@@ -15,19 +15,13 @@
     apt: 
       upgrade: yes
       
-  - name: "Install dependencies nodejs"
+  - name: "Install dependencies [nodejs & npm]"
     become: true
     apt:
-      name: nodejs
+      name: ["nodejs","npm"]
       state: latest
       update_cache: yes
-      
-  - name: "Installing npm dependencies"
-    shell: |
-      cd ~/backend-app
-      npm install  
-
-
+  
   - name: "Install pm2"
     become: true
     npm:
