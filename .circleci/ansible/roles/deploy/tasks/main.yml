@@ -26,7 +26,7 @@
     cd ~/backend-app
     npm install  
 
-- name: "Install pm2 globally"
+- name: "Install pm2"
   become: true
   apt:
     name: pm2
