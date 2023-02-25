@@ -40,22 +40,22 @@
       src: "files/artifact.tar.gz"
       dest: .
       
-  - name: "Executing Node app with PM2"
-    shell: |
-      cd ~/backend-app/dist
+  # - name: "Executing Node app with PM2"
+  #   shell: |
+  #     cd ~/backend-app/dist
       
-      cd ../
-      npm install --force
-      npm run build
+  #     cd ../
+  #     npm install --force
+  #     npm run build
       
-      sudo npm install forever -g
-      sudo npm install ts-node
-      forever start -c "ts-node -r tsconfig-paths/register -r dotenv/config src/main.ts" ./
+  #     sudo npm install forever -g
+  #     sudo npm install ts-node
+  #     forever start -c "ts-node -r tsconfig-paths/register -r dotenv/config src/main.ts" ./
 
   - name: "Start application"
     become: true
     shell: |
-      npm install
+      npm install --force
       pm2 stop default
       pm2 start npm -- start
     
