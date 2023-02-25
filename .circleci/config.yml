@@ -312,12 +312,9 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/python:3.10
+      - image: python:3.7-alpine3.16
     steps:
       - checkout
-      - install_ansible
-      - install_awscli
-      - install_nodejs
       - restore_cache:
           keys: [backend-build]
       - add_ssh_keys:
@@ -327,17 +324,16 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-             cd backend
-             npm install
-      - run:
-          name: Package Backend
-          command: |
-            cd backend
-            npm run build
-            tar -czvf artifact.tar.gz dist/* package*
+              apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
+      # - run:
+      #     name: Package Backend
+      #     command: |
+      #       cd backend
+      #       npm run build
+      #       tar -czvf artifact.tar.gz dist/* package*
 
-            cd ..
-            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
+      #       cd ..
+      #       cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
       - run:
           name: Deploy backend
           command: |
@@ -345,9 +341,18 @@ jobs:
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
       
-            cd .circleci/ansible
-            cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
+             cd backend
+             npm i
+             npm run build 
+             cd ..
+             # Zip the directory
+             tar -C backend -czvf artifact.tar.gz .
+             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+             cd .circleci/ansible
+             echo "Contents  of the inventory.txt file is -------"
+             cat inventory.txt
+             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
       - revert-migrations
