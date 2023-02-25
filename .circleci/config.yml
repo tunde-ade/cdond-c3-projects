@@ -329,41 +329,23 @@ jobs:
           command: |
              cd backend
              npm install
-      # - run:
-      #     name: Package Backend
-      #     command: |
-      #       cd backend
-      #       npm run build
-      #       tar -czvf artifact.tar.gz dist/* package*
+      - run:
+          name: Package Backend
+          command: |
+            cd backend
+            npm run build
+            tar -czvf artifact.tar.gz dist/* package*
 
-      #       cd ..
-      #       cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
+            cd ..
+            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files      
       - run:
           name: Deploy backend
           command: |
-            touch .env
-            echo ENVIRONMENT=production >> .env
-            echo TYPEORM_CONNECTION=postgres >> .env
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> .env
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> .env
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> .env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-            
-            cd backend
-            npm i
-            npm run build
-            cd ..
-            
-            # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
-            
+            export TYPEORM_MIGRATIONS_DIR=./migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
+      
             cd .circleci/ansible
-            
-            # echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  

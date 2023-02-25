@@ -1,74 +1,35 @@
 ---
-- name: "update local repo."
-  become: true
-  apt:
-    update_cache: yes
-    
-- name: "upgrade apt packages"
-  become: true
-  apt:
-    upgrade: yes
-    
-- name: "remove stale dependencies"
-  become: true
-  apt:
-    autoremove: yes
-    
-- name: "Install dependencies nodejs"
-  become: true
-  apt:
-    name: nodejs
-    state: latest
-    update_cache: yes
-  
-- name: "Installing npm dependencies"
-  shell: |
-    cd ~/backend-app
-    npm install  
-
-- name: "Install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-  
-- name: Create Backend App Directory
+- name: "Creates backend app directory"
   file:
     path: ~/backend-app
     state: directory
     
-- name: "Copy backend files"
-  become: true
-  copy:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/backend-app/artifact.tar.gz
-
-- name: "Start app"
-  become: true
+- name: "Unarchive backend files"
+  unarchive:
+    src: ~/backend/artifact.tar.gz
+    dest: ~/backend-app
+    
+- name: "Installing Node Dependencies"
   shell: |
-    cd /home/ubuntu/backend-app
-    tar xzvf artifact.tar.gz
-    npm install
-    npm run build
-    pm2 stop all
-    pm2 start npm --start
+    cd ~/backend-app
+    npm i
     
-# - name: "Executing Node app with PM2"
-#   shell: |
-#     cd ~/backend-app/dist
-#     pm2 stop default
-#     pm2 start main.js
+- name: "Executing Node app with PM2"
+  shell: |
+    cd ~/backend-app/dist
+    pm2 stop default
+    pm2 start main.js
 
-#   register: execute_node
+  register: execute_node
 
-# - name: print message
-#   debug:
-#     msg: "{{ execute_node.stdout_lines }}"
+- name: print message
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
     
-# - name: "Configure pm2 to start as service"
-#   shell: |
-#     sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
-#     pm2 save
+- name: "Configure pm2 to start as service"
+  shell: |
+    sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
+    pm2 save
 
 
     
