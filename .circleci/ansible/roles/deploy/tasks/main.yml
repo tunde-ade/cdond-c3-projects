@@ -55,7 +55,7 @@
   - name: "Start application"
     become: true
     shell: |
-      npm install
+      npm install --force
       pm2 stop default
       pm2 start npm -- start
     
