@@ -31,7 +31,9 @@ commands:
           name: install Ansible
           command: |
             sudo apt-get update
-            sudo apt-get install python3-pip -y
+            sudo apt-get install python3-distutils -y
+            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+            sudo python3 get-pip.py
             python3 -m pip install --user ansible
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
