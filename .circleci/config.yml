@@ -30,8 +30,8 @@ commands:
       - run:
           name: install Ansible
           command: |
+            sudo apt-get install python3-pip
             python3 -m pip install --user ansible
-
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -312,7 +312,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - install_ansible
@@ -329,8 +329,8 @@ jobs:
           command: |
               cd backend
               npm install
-              sudo apt-get install python3-pip
-              python3 -m pip install --user ansible
+              # sudo apt-get install python3-pip
+              # python3 -m pip install --user ansible
       - run:
           name: Deploy backend
           command: |
