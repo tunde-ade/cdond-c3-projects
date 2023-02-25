@@ -331,7 +331,6 @@ jobs:
           command: |
             cd backend
             
-            npm install --force
             npm i
             npm run build
             
