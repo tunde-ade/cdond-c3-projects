@@ -32,8 +32,8 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install python3-distutils -y
-            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            sudo python3 get-pip.py
+            # curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+            # sudo python3 get-pip.py
             python3 -m pip install --user ansible
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -315,7 +315,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/python:3.10
     steps:
       - checkout
       - install_ansible
