@@ -37,7 +37,7 @@
       
   - name: Unarchive files
     become: true
-      src: "files/artifact.tar.gz"
+      src: files/artifact.tar.gz
       dest: .
       
   # - name: "Executing Node app with PM2"
