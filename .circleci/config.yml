@@ -318,9 +318,9 @@ jobs:
       - image: cimg/python:3.10
     steps:
       - checkout
-      - install_ansible
-      - install_nodejs
-      - install_awscli
+      # - install_ansible
+      # - install_nodejs
+      # - install_awscli
       - restore_cache:
           keys: [backend-build]
       - add_ssh_keys:
@@ -330,10 +330,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-              cd backend
-              npm install
-              # sudo apt-get install python3-pip
-              # python3 -m pip install --user ansible
+            apk add --update --no-cache ansible tar gzip aws-cli openssh
       - run:
           name: Deploy backend
           command: |
