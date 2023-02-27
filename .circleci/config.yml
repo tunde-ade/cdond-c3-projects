@@ -227,11 +227,15 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_ansible
+      # - install_ansible
       - add_ssh_keys:
           fingerprints: ["34:46:2b:b7:3b:c0:fc:4b:30:fb:e6:50:6f:2e:ed:5a"]
       - attach_workspace:
-          at: ~/                           
+          at: ~/         
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache ansible tar gzip aws-cli openssh
       - run:
           name: Run Configure server Ansible play
           command: |
