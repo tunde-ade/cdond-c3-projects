@@ -223,19 +223,19 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: python:3.10-alpine3.16
+      - image: cimg/python:3.10
     steps:
       - checkout
-      # - install_awscli
-      # - install_ansible
+      - install_awscli
+      - install_ansible
       - add_ssh_keys:
           fingerprints: ["27:3f:bb:6f:4b:56:c7:18:a3:72:ec:1f:b5:7c:ac:22"]
       - attach_workspace:
           at: ~/         
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache ansible tar gzip aws-cli nodejs npm openssh curl
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add --update --no-cache ansible tar gzip aws-cli nodejs npm openssh curl
       - run:
           name: Run Configure server Ansible play
           command: |
