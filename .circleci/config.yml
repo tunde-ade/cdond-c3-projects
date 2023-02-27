@@ -223,7 +223,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/python:3.10-alpine3.16
     steps:
       - checkout
       - install_awscli
