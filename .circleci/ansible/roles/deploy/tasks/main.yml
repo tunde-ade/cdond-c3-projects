@@ -10,25 +10,36 @@
     apt:
       autoremove: yes
 
-  - name: "upgrade packages"
-    become: true
-    apt: 
-      upgrade: yes
-      
-  - name: "Install dependencies [nodejs & npm]"
+ - name: "Package upgrade"
     become: true
     apt:
-      name: ["nodejs","npm"]
+      upgrade: "yes"
+
+  - name: "install nodejs and npm."
+    become: true
+    apt:
+      name: ["nodejs", "npm"]
       state: latest
       update_cache: yes
-  
-  - name: "Install pm2"
+
+  - name: "install n"
+    become: true
+    npm:
+      name: n
+      global: yes
+      production: yes
+
+  - name: "install nodejs - 13.8.0"
+    become: true
+    shell: n 13.8.0
+
+  - name: "install pm2"
     become: true
     npm:
       name: pm2
       global: yes
       production: yes
-      state: latest
+      state: present 
 
   - name: Create Backend App Directory
     file:
@@ -37,8 +48,8 @@
       
   - name: Unarchive files
     become: true
-      src: files/artifact.tar.gz
-      dest: .
+      src: artifact.tar.gz
+      dest: ~/backend-app
       
   # - name: "Executing Node app with PM2"
   #   shell: |
