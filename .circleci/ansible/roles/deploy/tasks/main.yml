@@ -30,15 +30,16 @@
       production: yes
       state: present 
 
-  - name: Create Backend App Directory
+  - name: "Create Backend App Directory"
     file:
       path: ~/backend-app
       state: directory
       
-  - name: Unarchive files
+  - name: "Unarchive files to instance"
     become: true
-      src: artifact.tar.gz
-      dest: ~/backend-app
+    copy:
+      src: ~/project/artifact.tar.gz
+      dest: /home/ubuntu/backend-app/artifact.tar.gz
       
   # - name: "Executing Node app with PM2"
   #   shell: |
@@ -55,7 +56,10 @@
   - name: "Start application"
     become: true
     shell: |
+      cd /home/ubuntu/backend-app
+      tar -xzvf artifact.tar.gz
       npm install
+      npm run build
       pm2 stop default
       pm2 start npm -- start
     
