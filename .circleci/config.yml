@@ -235,7 +235,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache ansible tar gzip aws-cli openssh
+            apk add --update --no-cache ansible tar gzip aws-cli openssh curl
       - run:
           name: Run Configure server Ansible play
           command: |
