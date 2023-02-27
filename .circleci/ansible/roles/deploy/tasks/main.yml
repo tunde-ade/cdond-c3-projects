@@ -4,16 +4,16 @@
     apt:
       update_cache: yes
       cache_valid_time: 86400
+  
+  - name: "Package upgrade"
+    become: true
+    apt:
+      upgrade: yes
         
   - name: "remove unneeded deps"
     become: true
     apt:
       autoremove: yes
-
- - name: "Package upgrade"
-    become: true
-    apt:
-      upgrade: "yes"
 
   - name: "install nodejs and npm."
     become: true
