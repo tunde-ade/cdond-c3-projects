@@ -22,7 +22,7 @@
       node_version: 13.8.0
     environment:
       NODE_VERSION: "{{ node_version }}"
-    shell: |
+    command: |
       curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
       sudo apt-get install -y nodejs
       sudo npm install -g npm@latest
