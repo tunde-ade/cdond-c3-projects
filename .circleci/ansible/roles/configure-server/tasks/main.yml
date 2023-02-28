@@ -19,13 +19,10 @@
         state: latest
         update_cache: yes
   
-  - name: "install pm2"
-    become: yes
+  - name: "Install PM2 Globally"
     npm:
       name: pm2
       global: yes
-      state: latest
-      production: yes
 
 # - name: "move env variables to /etc/profile.d/"
 #   become: true
