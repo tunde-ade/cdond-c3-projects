@@ -240,7 +240,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache ansible tar gzip awscli
+            apk add --update --no-cache ansible tar gzip aws-cli
 
       - run:
           name: Configure Server Ansible play
