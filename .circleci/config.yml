@@ -74,111 +74,124 @@ commands:
 jobs:
   build-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-build]
+          keys:
+            - frontend-deps-{{ checksum "frontend/package-lock.json" }}
       - run:
-          name: Build front-end
+          name: Install dependencies
           command: |
             cd frontend
             npm install
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
             npm run build
       - save_cache:
           paths: [frontend/node_modules]
-          key: frontend-build
+          key: frontend-deps-{{ checksum "frontend/package-lock.json" }}
 
   build-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-build]
+          keys:
+            - backend-deps-{{ checksum "backend/package-lock.json" }}
       - run:
-          name: Back-end build
+          name: Install dependencies
           command: |
             cd backend
             npm install
+      - run:
+          name: Build backend
+          command: |
+            cd backend
             npm run build
       - save_cache:
           paths: [backend/node_modules]
-          key: backend-build
+          key: backend-deps-{{ checksum "backend/package-lock.json" }}
 
   test-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-test]
+          keys:
+            - frontend-deps-{{ checksum "frontend/package-lock.json" }}
       - run:
-          name: Frontend test
+          name: Install dependencies
           command: |
             cd frontend
             npm install
-            npm run test 
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-test
-           
+      - run:
+          name: Run frontend unit tests
+          command: |
+            cd frontend
+            npm run test
   test-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-test]
+          keys:
+            - backend-deps-{{ checksum "backend/package-lock.json" }}
       - run:
-          name: Backend Test
+          name: Install dependencies
           command: |
             cd backend
             npm install
-            npm run test 
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-test
-            
+      - run:
+          name: Run backend unit tests
+          command: |
+            cd backend
+            npm run test
   scan-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-scan]
+          keys:
+            - frontend-deps-{{ checksum "frontend/package-lock.json" }}
       - run:
-          name: Run Frontend Scan
+          name: Install all dependencies
           command: |
             cd frontend
             npm install
-            npm install oauth-sign@^0.9.0
-            npm audit fix --audit-level=critical --force
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical 
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-scan
+      - run:
+          name: Scan frontend packages
+          command: |
+            cd frontend
+            npm audit fix --force --audit-level=critical
+            npm audit fix --force --audit-level=critical
+            npm audit --audit-level=critical
   scan-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-scan]
+          keys:
+            - backend-deps-{{ checksum "backend/package-lock.json" }}
       - run:
-          name: Run Backend Scan
+          name: Install dependencies
           command: |
             cd backend
             npm install
-            npm install oauth-sign@^0.9.0
-            npm audit fix --audit-level=critical --force
-            npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical 
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-scan
-
+      - run:
+          name: Scan backend packages
+          command: |
+            cd backend
+            npm audit fix --force --audit-level=critical
+            npm audit fix --force --audit-level=critical
+            npm audit --audit-level=critical
   deploy-infrastructure:
     docker:
       - image: cimg/python:3.10
@@ -186,22 +199,21 @@ jobs:
       - checkout
       - install_awscli
       - run:
-          name: Ensure front-end infrastructure exist
+          name: Ensure frontend infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+            --template-file .circleci/files/frontend.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
-          name: Ensure back-end infrastructure exists
+          name: Ensure backend infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" 
-              
+            --template-file .circleci/files/backend.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -215,34 +227,27 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure 
-      - destroy-environment    
 
   configure-infrastructure:
     docker:
-      - image: python:3.10-alpine3.16
+      - image: cimg/python:3.10
     steps:
       - checkout
-      # - install_awscli
-      # - install_ansible
+      - install_ansible
+      - install_awscli
       - add_ssh_keys:
           fingerprints: ["27:3f:bb:6f:4b:56:c7:18:a3:72:ec:1f:b5:7c:ac:22"]
       - attach_workspace:
-          at: ~/         
+          at: ~/
       - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache ansible tar gzip aws-cli nodejs npm openssh
-      - run:
-          name: Configure server 
+          name: Run Configure Server Ansible play
           command: |
             cd .circleci/ansible
             cat inventory.txt
-
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
-          
 
+          
   run-migrations:
     docker:
       - image: cimg/python:3.10
