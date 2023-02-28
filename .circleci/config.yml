@@ -285,11 +285,11 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/python:3.10 
+      - image: python:3.7-alpine3.16 
     steps:
       - checkout
-      - install_awscli
-      - install_nodejs
+      # - install_awscli
+      # - install_nodejs
       - restore_cache:
           keys: [frontend-build]
       # - add_ssh_keys:
@@ -300,8 +300,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd frontend
-            npm install
+            # cd frontend
+            # npm install
+            apk add --update --no-cache tar gzip nodejs npm aws-cli
       - run:
           name: Get backend url
           command: |
