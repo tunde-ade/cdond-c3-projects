@@ -12,31 +12,21 @@
         autoremove: yes
   
   - name: Install Nodejs and npm
-    become: true
-    apt:
-      name:
-        - curl
-        - gnupg
     vars:
       node_version: 13.8.0
     environment:
       NODE_VERSION: "{{ node_version }}"
-    command: curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
-    
-  - name: Install dependencies ['Nodejs', 'npm']
-    become: true
-    apt:
-      name: nodejs
-      state: present
-    environment:
-      NODE_VERSION: "{{ node_version }}"
-    command: sudo npm install -g npm@latest
+    shell: |
+      curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
+      sudo apt-get install -y nodejs
+      sudo npm install -g npm@latest
   
   - name: Install pm2
     become: true
     npm:
       name: pm2
       global: yes
+
   
   # - name: "install nodejs and npm."
   #   become: true
