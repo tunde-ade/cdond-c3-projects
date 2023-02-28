@@ -12,17 +12,31 @@
     apt:
         autoremove: yes
   
-  - name: "install dependencies"
-    become: yes
+  - name: "install nodejs and npm."
+    become: true
     apt:
-        name: ['nodejs', 'npm']
-        state: latest
-        update_cache: yes
-  
-  - name: "Install PM2 Globally"
+      name: ["nodejs", "npm"]
+      state: latest
+      update_cache: yes
+
+  - name: "install n"
+    become: true
+    npm:
+      name: n
+      global: yes
+      production: yes
+
+  - name: "install nodejs - 13.8.0"
+    become: true
+    shell: n 13.8.0
+
+  - name: "install pm2"
+    become: true
     npm:
       name: pm2
       global: yes
+      production: yes
+      state: present 
 
 # - name: "move env variables to /etc/profile.d/"
 #   become: true
