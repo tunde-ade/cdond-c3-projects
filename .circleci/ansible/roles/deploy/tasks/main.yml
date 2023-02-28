@@ -11,31 +11,39 @@
     apt:
         autoremove: yes
   
-  - name: "install nodejs and npm."
+  - name: Install Node.js and npm
     become: true
     apt:
-      name: ["nodejs", "npm"]
-      state: latest
-      update_cache: yes
-
-  # - name: "install n"
-  #   become: true
-  #   npm:
-  #     name: n
-  #     global: yes
-  #     production: yes
-
-  # - name: "install nodejs - 13.8.0"
-  #   become: true
-  #   shell: n 13.8.0
-
-  - name: "install pm2"
+      name:
+        - curl
+        - gnupg
+    vars:
+      node_version: 13.8.0
+    environment:
+      NODE_VERSION: "{{ node_version }}"
+    shell: |
+      curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
+      sudo apt-get install -y nodejs
+      sudo npm install -g npm@latest
+  
+  - name: Install pm2
     become: true
     npm:
       name: pm2
       global: yes
-      production: yes
-      state: present 
+  
+  # - name: "install nodejs and npm."
+  #   become: true
+  #   apt:
+  #     name: ["nodejs", "npm"]
+  #     state: latest
+  #     update_cache: yes
+
+  # - name: "install pm2"
+  #   become: true
+  #   npm:
+  #     name: pm2
+  #     global: yes
       
   - name: Create Backend App Directory
     file:
