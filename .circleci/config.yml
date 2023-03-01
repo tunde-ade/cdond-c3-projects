@@ -67,8 +67,7 @@ commands:
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS=$(curl --insecure https://kvdb.io/GEn2WMoitQETDzL1jxzn3d/migration_<< parameters.workflow_id >>)
             
-            SUCCESS = 1
-            if (( $SUCCESS==1 )); 
+            if (( $SUCCESS == 1 ));
             then
               cd ~/project/backend
               npm install
@@ -403,7 +402,7 @@ jobs:
             URL=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s ${URL} | grep "Welcome"
             then
-              exit 0
+              exit 1
             else
               exit 1
             fi
