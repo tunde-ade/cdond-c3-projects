@@ -1,60 +1,37 @@
 ---
   
-  - name: "update and upgrade packages"
+  - name: "update apt packages."
     become: yes
     apt:
-      upgrade: yes
       update_cache: yes
-      cache_valid_time: 86400
-  
-  - name: "remove unwanted dependencies"
+
+  - name: "remove dependencies that are no longer required"
     become: yes
     apt:
-        autoremove: yes
-  
-  - name: Install Nodejs and npm
-    vars:
-      node_version: 13.8.0
-    environment:
-      NODE_VERSION: "{{ node_version }}"
-    shell: |
-      curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
-      sudo apt-get install -y nodejs
-      sudo npm install -g npm@latest
-  
-  - name: Install pm2
-    become: true
+      autoremove: yes
+
+  - name: "install nodejs and npm"
+    become: yes
+    apt:
+      name: ["nodejs", "npm"]
+      state: latest
+      update_cache: yes
+
+  - name: "install n"
+    become: yes
+    npm:
+      name: n
+      global: yes
+      production: yes
+
+  - name: "install nodejs 13.8.0"
+    become: yes
+    shell: n 13.8.0
+
+  - name: "install pm2"
+    become: yes
     npm:
       name: pm2
       global: yes
-
-  
-  # - name: "install nodejs and npm."
-  #   become: true
-  #   apt:
-  #     name: ["nodejs", "npm"]
-  #     state: latest
-  #     update_cache: yes
-
-  # - name: "install n"
-  #   become: true
-  #   npm:
-  #     name: n
-  #     global: yes
-  #     production: yes
-
-  # - name: "install nodejs - 13.8.0"
-  #   become: true
-  #   shell: n 13.8.0
-
-  # - name: "install pm2"
-  #   become: true
-  #   npm:
-  #     name: pm2
-  #     global: yes
-
-# - name: "move env variables to /etc/profile.d/"
-#   become: true
-#   copy:
-#     src: myenv.sh
-#     dest: /etc/profile.d/
+      production: yes
+      state: present

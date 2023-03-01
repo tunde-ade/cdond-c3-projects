@@ -1,62 +1,52 @@
 ---
-  - name: "update and upgrade packages"
-    become: yes
-    apt:
-      upgrade: yes
-      update_cache: yes
-      cache_valid_time: 86400
-  
-  - name: "remove unwanted dependencies"
-    become: yes
-    apt:
-        autoremove: yes
-  
-  - name: Install Nodejs and npm
-    vars:
-      node_version: 13.8.0
-    environment:
-      NODE_VERSION: "{{ node_version }}"
-    shell: |
-      curl -sL https://deb.nodesource.com/setup_{{ node_version }} | sudo -E bash -
-      sudo apt-get install -y nodejs
-      sudo npm install -g npm@latest
-  
-  - name: Install pm2
+  - name: create directory
     become: true
-    npm:
-      name: pm2
-      global: yes
-
+    command: mkdir /home/ubuntu/udapeople
   
-  # - name: "install nodejs and npm."
-  #   become: true
-  #   apt:
-  #     name: ["nodejs", "npm"]
-  #     state: latest
-  #     update_cache: yes
-
-  # - name: "install pm2"
-  #   become: true
-  #   npm:
-  #     name: pm2
-  #     global: yes
-      
-  - name: Create Backend App Directory
-    file:
-      path: ~/backend-app
-      state: directory
-      
-  - name: "Copy backend files"
+  - name: copy artifact.tar.gz
     become: true
     copy:
-      src: ~/project/artifact.tar.gz
-      dest: /home/ubuntu/backend-app/artifact.tar.gz
-    
-  - name: "Start application"
+        src: artifact.tar.gz
+        dest: /home/ubuntu/udapeople/artifact.tar.gz
+        owner: ubuntu
+        group: ubuntu
+  
+  - name: "prepare artifact.tar.gz"
     become: true
     shell: |
-      cd /home/ubuntu/backend-app
-      tar xzvf artifact.tar.gz
-      npm install
-      pm2 stop default
-      pm2 start npm -- start
+        args:
+            executable: /bin/bash
+        pwd
+        cd /home/ubuntu/udapeople
+        tar -xvf artifact.tar.gz
+        rm -rf artifact.tar.gz
+  
+  - name: "stop instances"
+    become: true
+    shell: |
+        pm2 delete all
+    ignore_errors: true
+  
+  - name: deploy backend server
+    become: true
+    shell: |
+        cd /home/ubuntu/udapeople/dist
+        pm2 start -f ./main.js -n udapeople
+    environment:
+        ENVIRONMENT: production
+        TYPEORM_CONNECTION: postgres
+        TYPEORM_ENTITIES: "/home/ubuntu/udapeople/dist/modules/domain/**/*.entity{.ts,.js}"
+        TYPEORM_MIGRATIONS_DIR: "/home/ubuntu/udapeople/dist/migrations"
+        TYPEORM_MIGRATIONS: "/home/ubuntu/udapeople/dist/migrations/*.js"      
+        TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
+        TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
+        TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
+        TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
+        TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
+        
+    ignore_errors: true
+  
+  - name: save list of Processes
+    shell: |
+        pm2 save
+    ignore_errors: true
