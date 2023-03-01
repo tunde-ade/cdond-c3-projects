@@ -1,52 +1,32 @@
 ---
-  - name: create directory
-    become: true
-    command: mkdir /home/ubuntu/udapeople
+  - name: "Creates backend app directory"
+    file:
+      path: ~/backend-app
+      state: directory
+    
+  - name: "Unarchive backend files"
+    unarchive:
+      src: artifact.tar.gz
+      dest: ~/backend-app
+    
+  - name: "Installing Node Dependencies"
+    shell: |
+      cd ~/backend-app
+      npm i
   
-  - name: copy artifact.tar.gz
-    become: true
-    copy:
-        src: artifact.tar.gz
-        dest: /home/ubuntu/udapeople/artifact.tar.gz
-        owner: ubuntu
-        group: ubuntu
+  - name: "Executing Node app with PM2"
+    shell: |
+      cd ~/backend-app/dist
+      pm2 stop default
+      pm2 start main.js
   
-  - name: "prepare artifact.tar.gz"
+    register: execute_node
+    
+  - name: print message
+    debug:
+      msg: "{{ execute_node.stdout_lines }}"
+    
+  - name: "Configure pm2 to start as service"
     become: true
     shell: |
-        args:
-            executable: /bin/bash
-        pwd
-        cd /home/ubuntu/udapeople
-        tar -xvf artifact.tar.gz
-        rm -rf artifact.tar.gz
-  
-  - name: "stop instances"
-    become: true
-    shell: |
-        pm2 delete all
-    ignore_errors: true
-  
-  - name: deploy backend server
-    become: true
-    shell: |
-        cd /home/ubuntu/udapeople/dist
-        pm2 start -f ./main.js -n udapeople
-    environment:
-        ENVIRONMENT: production
-        TYPEORM_CONNECTION: postgres
-        TYPEORM_ENTITIES: "/home/ubuntu/udapeople/dist/modules/domain/**/*.entity{.ts,.js}"
-        TYPEORM_MIGRATIONS_DIR: "/home/ubuntu/udapeople/dist/migrations"
-        TYPEORM_MIGRATIONS: "/home/ubuntu/udapeople/dist/migrations/*.js"      
-        TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
-        TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
-        TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
-        TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
-        TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
-        
-    ignore_errors: true
-  
-  - name: save list of Processes
-    shell: |
-        pm2 save
-    ignore_errors: true
+      env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
