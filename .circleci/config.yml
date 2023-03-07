@@ -307,6 +307,7 @@ jobs:
             cd frontend
             npm install
             # apk add --update --no-cache tar gzip nodejs npm aws-cli
+            
       - run:
           name: Get backend url
           command: |
@@ -348,6 +349,7 @@ jobs:
           command: |
             cd backend
             npm install
+            # apk add --update --no-cache tar gzip nodejs npm aws-cli
       - run:
           name: Package Backend
           command: |
